@@ -101,9 +101,14 @@ Update the installation record, mark it removed, and describe what was removed a
    means no matches; other errors are failed checks, not a clean result. Also
    inspect ignored local env files by variable name without dumping values.
 3. Deploy the code removal to every intended environment using the project's
-   normal release process. Verify the intended aliases point to the new build.
-   Keep the gate credentials until this succeeds, so rollback remains possible
-   and an unrelated build from old code does not accidentally ship ungated.
+   normal release process. Before an alias is pointed at a build that no longer
+   strips the bypass header, stop callers from sending `x-deploy-gate-bypass`
+   and the legacy `x-preview-gate-bypass` (header or query) to that alias.
+   Those callers can be locked out of the still-gated deployment until the
+   alias moves; that is preferable to the token reaching the app and its logs.
+   Then verify the intended aliases point to the new build. Keep the gate
+   credentials until this succeeds, so rollback remains possible and an
+   unrelated build from old code does not accidentally ship ungated.
 
 ## 4. Clean up configuration outside Git
 
@@ -133,15 +138,15 @@ deployment that already built with the credential.
 | `PREVIEW_GATE_BYPASS_TOKENS` | Legacy token fallback |
 | `DEPLOY_GATE_BYPASS_SECRET` | Optional CI/monitoring credential convention; not a gate runtime variable |
 
-Stop callers from sending `x-deploy-gate-bypass` and the legacy
-`x-preview-gate-bypass` header or query parameter to the newly public aliases
-in the same cutover as the middleware removal. The installed gate strips that
-header before the app sees it; once the stripper is gone, a monitor or CI job
-that still sends it exposes the token to the application and to request logs.
-Update tests, monitors, scripts, and saved links at that point, not as a later
-cleanup. A caller that must still open an old gated deployment URL may keep
-using the token against that URL only. Inspect custom-named CI secrets recorded
-during installation too. Do not delete shared credentials or Vercel's
+The caller update belongs in step 3, before the alias change, not after it.
+Update tests, monitors, scripts, and saved links so they no longer send
+`x-deploy-gate-bypass` or the legacy `x-preview-gate-bypass` header or query
+parameter to aliases that are about to become public. The installed gate strips
+that header before the app sees it; once the stripper is gone, a request that
+still carries it exposes the token to the application and to request logs. A
+caller that must still open an old gated deployment URL may keep using the
+token against that URL only. Inspect custom-named CI secrets recorded during
+installation too. Do not delete shared credentials or Vercel's
 `VERCEL_AUTOMATION_BYPASS_SECRET`, which belongs to independent platform
 protection. Removing a caller copy does not revoke the token on an immutable
 deployment that already has it.

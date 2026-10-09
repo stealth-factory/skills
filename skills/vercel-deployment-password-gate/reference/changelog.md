@@ -14,8 +14,8 @@ record is marked removed afterward and kept as the audit trail. Leftover search
 and post-removal checks include legacy
 `/__preview-unlock` and hyphenated `preview-gate` identifiers. Deleting a shared
 credential is gated on remaining deployable branches, because absent config
-fails open. Bypass-header callers stop at cutover, when header stripping goes
-away. Templates' runtime behavior is unchanged.
+fails open. Bypass-header callers stop before an alias moves to a build that
+no longer strips the header. Templates' runtime behavior is unchanged.
 
 Provenance: Next 16 proxy rename + Node-only runtime verified against the
 official v16 upgrade guide (2026-07); build-time `VERCEL_ENV`/`VERCEL`
