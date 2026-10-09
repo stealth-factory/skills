@@ -201,12 +201,14 @@ has `PREVIEW_PASSWORD_HASH` keeps working; migrate at leisure). The current name
    external configuration changes. Never record passwords, hashes, tokens, or
    bypass URLs. Include this initial record in the installation commit.
 5. After committing, record the full installation SHA(s) in a separate docs
-   commit (a commit cannot contain its own SHA). After a squash/rebase, update
-   the record with the actual commits on the target branch; the PR URL helps
-   locate them. Record prerequisites separately as **keep by default**. Include
-   the uninstall guide link and these SHAs in the handoff. If commits are
-   explicitly disallowed, keep the record and report that manual removal is
-   required until an isolated installation commit exists.
+   commit (a commit cannot contain its own SHA). That bookkeeping commit is not
+   a gate-only revert target. After a squash/rebase, update the record with the
+   actual commits on the target branch; the PR URL helps locate them. Record
+   prerequisites separately as **keep by default**. Include the uninstall guide
+   link and these SHAs in the handoff. If commits are explicitly disallowed,
+   keep the record and report that manual removal is required until an isolated
+   installation commit exists. The uninstall guide keeps the record through a
+   modify/delete conflict on that later commit and marks it removed.
 
 A Git revert only undoes repository changes. Vercel variables, CI secrets,
 platform settings, and existing deployments need separate cleanup; see

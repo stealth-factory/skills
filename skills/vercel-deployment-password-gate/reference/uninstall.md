@@ -28,10 +28,14 @@ unrelated edits. Do not reset or discard the user's work.
 ## 2A. Preferred: revert isolated gate commits
 
 1. Identify the gate installation and later gate-only fixes from the record and
-   history. Inspect **each** with `git show --stat <sha>` and
-   `git show <sha>`; a commit title alone does not prove it is gate-only.
-   Use SHAs that actually exist in the target branch's history. After a squash,
-   use the final gate-only squash commit, not both it and the original commits.
+   history. Do **not** put the separate installation-record SHA bookkeeping
+   commit in that revert sequence: it only records SHAs the install commit
+   could not contain. Reverting the install commit while that later commit
+   remains can conflict on the record file; step 4 keeps the file. Inspect
+   **each** candidate with `git show --stat <sha>` and `git show <sha>`; a
+   commit title alone does not prove it is gate-only. Use SHAs that actually
+   exist in the target branch's history. After a squash, use the final
+   gate-only squash commit, not both it and the original commits.
 2. Keep prerequisite migrations and unrelated features. If a commit mixes them
    with the gate, or later application work depends on a file it introduced,
    use manual removal (2B). A clean revert can still break later code.
@@ -49,14 +53,18 @@ unrelated edits. Do not reset or discard the user's work.
    unrelated work. Do not use `git reset --hard`, force-push, or restore entire
    files from the pre-install revision.
 4. If a revert conflicts, resolve only when you can preserve current application
-   behavior and remove just the gate, then `git revert --continue`. Otherwise
-   `git revert --abort` and use step 2B on the current tree. Previously completed
-   reverts remain; do not apply them twice. Do not guess `git revert -m` for a
-   merge commit; use manual removal unless its parent and complete diff are
-   understood.
+   behavior and remove just the gate, then `git revert --continue`. A
+   modify/delete conflict on the installation record is expected when the later
+   SHA bookkeeping commit touched it: keep that file (`git add` the version Git
+   left in the tree) and do not `git rm` it. Otherwise `git revert --abort` and
+   use step 2B on the current tree. Previously completed reverts remain; do not
+   apply them twice. Do not guess `git revert -m` for a merge commit; use
+   manual removal unless its parent and complete diff are understood.
 5. Review the resulting diff against the manual checklist below for leftovers
-   and unintended removals. Preserve/recreate the installation record as an
-   audit trail if the revert deleted it, recording the uninstall commit(s).
+   and unintended removals. If the revert deleted the installation record,
+   recreate it from the template. Then mark the record removed, describe what
+   was removed and what was kept, and record the uninstall commit(s). Keep the
+   record as an audit trail.
 
 Continue to step 3. Reverting the installation is not the end of uninstall.
 
@@ -68,14 +76,14 @@ or the gate and host code have evolved together.
 | Installation | Required edit |
 | --- | --- |
 | **Mode A: existing host middleware/proxy** | Remove the gate helper import, `previewGate` call, block-return branch, and `withUnlockCookie` wrapper. Remove gate-only bypass-header stripping and request reconstruction; reconnect the original request/response flow while preserving later application behavior. Delete the helper only after all its consumers are removed. **Keep the host middleware/proxy file**, i18n, redirects, rewrites, auth, and other cookies. |
-| **Mode B: standalone gate** | Remove the gate-only `proxy.ts` / `src/proxy.ts` (or configured `pageExtensions` filename), or root `middleware.ts` for non-Next apps. Inspect the contents first: the `@deploy-gate:managed` marker is not proof that no application logic was added later. If shared, remove only the gate and retain host logic as in Mode A. |
+| **Mode B: standalone gate** | Remove the gate-only file at the path that was actually installed. Next 16: `proxy.ts` or `src/proxy.ts`, including a `pageExtensions` name such as `proxy.page.ts`. Next ≤15: `middleware.ts` or `src/middleware.ts` (the export is `middleware`), including a `pageExtensions` name such as `middleware.page.ts`. Non-Next Routing Middleware: root `middleware.ts` only; `src/middleware.ts` is not loaded. Inspect the contents first: `@deploy-gate:managed` or the legacy `@preview-gate:managed` marker is not proof that no application logic was added later. If shared, remove only the gate and retain host logic as in Mode A. |
 | **Production build strip** | Remove `node scripts/remove-proxy-on-prod.mjs &&` from every build entry that uses it, including package scripts, CI, and a Vercel dashboard Build Command override. Preserve the rest of the build command. Then delete the unused script. **Do not run the script as an uninstaller**: it only strips marked files during production builds. |
-| **Matchers/runtime/cache configuration** | Remove gate-only matcher branches and exceptions for `/__deploy-unlock`; retain coverage needed by the host. Remove gate-only runtime/cache entries only if unused elsewhere. Keep middleware-to-proxy migrations by default. Do not delete `VERCEL_ENV` or `VERCEL_TARGET_ENV` from shared configuration merely because the gate used them. |
+| **Matchers/runtime/cache configuration** | Remove gate-only matcher branches and exceptions for `/__deploy-unlock` and the legacy `/__preview-unlock`; retain coverage needed by the host. Remove gate-only runtime/cache entries only if unused elsewhere. Keep middleware-to-proxy migrations by default. Do not delete `VERCEL_ENV` or `VERCEL_TARGET_ENV` from shared configuration merely because the gate used them. |
 | **Dependencies and supporting files** | Remove `@vercel/functions` only if the gate introduced it and no remaining code uses it. Use the project's package manager to update its lockfile. Remove gate-only tests, copied hash/token helpers, branded assets, docs/examples, and env declarations; preserve shared resources. |
 
 Use the actual installed names, which may differ from the templates. Commit the
 reviewed removal separately, e.g. `revert(deploy-gate): remove password protection`.
-Update the installation record to describe what was removed and what was kept.
+Update the installation record, mark it removed, and describe what was removed and what was kept.
 
 ## 3. Validate and deploy the code removal
 
@@ -85,7 +93,7 @@ Update the installation record to describe what was removed and what was kept.
 2. Search tracked source/configuration for leftovers without printing secrets:
 
    ```bash
-   git grep -l -E 'DEPLOY_GATE_|PREVIEW_PASSWORD|PREVIEW_GATE_BYPASS_TOKENS|previewGate|withUnlockCookie|deploy-gate|deploy_gate|preview_gate|/__deploy-unlock'
+   git grep -l -E 'DEPLOY_GATE_|PREVIEW_PASSWORD|PREVIEW_GATE_|previewGate|withUnlockCookie|deploy-gate|preview-gate|deploy_gate|preview_gate|/__deploy-unlock|/__preview-unlock'
    ```
 
    This prints filenames only. Inspect matches carefully; the retained audit
@@ -106,6 +114,14 @@ Remove them from local `.env*` files, CI, and secret-manager entries where prese
 Use the dashboard or the installed CLI's verified syntax; do not bulk-delete
 variables by prefix or expose their values.
 
+Before removing a shared Preview or Production credential, list every branch,
+custom environment, and commit source that can still deploy and still contains
+the gate. Absent configuration fails open: the next build of that old code
+publishes ungated. Land the code removal on each of those sources first, retire
+them so they cannot deploy, or keep a branch-specific credential until their
+removal is deployed. Deleting the shared scope does not change an immutable
+deployment that already built with the credential.
+
 | Variable | Why it must be checked |
 | --- | --- |
 | `DEPLOY_GATE_PASSWORD_HASH` | Current password credential |
@@ -117,11 +133,18 @@ variables by prefix or expose their values.
 | `PREVIEW_GATE_BYPASS_TOKENS` | Legacy token fallback |
 | `DEPLOY_GATE_BYPASS_SECRET` | Optional CI/monitoring credential convention; not a gate runtime variable |
 
-Remove gate-only `x-deploy-gate-bypass` headers/query parameters and old
-`x-preview-gate-bypass` usage from tests, monitors, scripts, and saved links.
-Inspect custom-named CI secrets recorded during installation too. Do not delete
-shared credentials or Vercel's `VERCEL_AUTOMATION_BYPASS_SECRET`, which belongs
-to independent platform protection.
+Stop callers from sending `x-deploy-gate-bypass` and the legacy
+`x-preview-gate-bypass` header or query parameter to the newly public aliases
+in the same cutover as the middleware removal. The installed gate strips that
+header before the app sees it; once the stripper is gone, a monitor or CI job
+that still sends it exposes the token to the application and to request logs.
+Update tests, monitors, scripts, and saved links at that point, not as a later
+cleanup. A caller that must still open an old gated deployment URL may keep
+using the token against that URL only. Inspect custom-named CI secrets recorded
+during installation too. Do not delete shared credentials or Vercel's
+`VERCEL_AUTOMATION_BYPASS_SECRET`, which belongs to independent platform
+protection. Removing a caller copy does not revoke the token on an immutable
+deployment that already has it.
 
 **Unset obsolete variables; do not replace them with empty strings or `{}`.**
 Present-but-empty credentials can fail closed in remaining old gate code. Check
@@ -144,8 +167,9 @@ headers, or bypass query parameters on every intended new environment/alias:
   a bare 200 or a platform login page is not proof of successful removal.
 - A nested page and an API route still behave correctly. Retained host rewrites,
   redirects, auth, and cookies work. No new `deploy_gate` or `preview_gate`
-  cookie is issued, and `/__deploy-unlock` no longer serves the gate handler
-  (a framework fallback/404 is acceptable).
+  cookie is issued. Neither `/__deploy-unlock` nor the legacy
+  `/__preview-unlock` serves the gate handler (a framework fallback/404 is
+  acceptable).
 - Independent Vercel protection may still block anonymous access. Report that
   separately and follow the user's intended scope; do not silently disable it.
 
