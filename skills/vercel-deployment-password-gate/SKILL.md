@@ -1,10 +1,10 @@
 ---
 name: vercel-deployment-password-gate
-description: "A free DIY reimplementation of Vercel's $150/mo Advanced Deployment Protection add-on — all three features (Password Protection, private/prod deployments, Deployment Protection Exceptions) plus named automation bypass tokens — a middleware gate for ANY framework on Vercel (Next.js proxy, or SvelteKit/Nuxt/Astro/Remix/static via Routing Middleware). Gates previews by default, production opt-in; fully branded unlock page; zero prod cost. Use when asked to password-protect or basic-auth a preview/staging URL, avoid or cancel that add-on, password-protect on a Hobby plan, brand/white-label a password wall, add a login that \"shows once and stays unlocked\", set or ROTATE the password, add/remove bypass tokens for CI or automation (Lighthouse, uptime), make one preview domain public, protect previews on an app with NO existing middleware, gate a production or pre-launch site with a shared password (coming-soon, client demo, internal tool), or choose between a DIY gate and Vercel Authentication (free team SSO)."
+description: "A free DIY reimplementation of Vercel's $150/mo Advanced Deployment Protection add-on — all three features (Password Protection, private/prod deployments, Deployment Protection Exceptions) plus named automation bypass tokens — a middleware gate for ANY framework on Vercel (Next.js proxy, or SvelteKit/Nuxt/Astro/Remix/static via Routing Middleware). Gates previews by default, production opt-in; fully branded unlock page; zero prod cost. Use when asked to password-protect or basic-auth a preview/staging URL, avoid or cancel that add-on, password-protect on a Hobby plan, brand/white-label a password wall, add a login that \"shows once and stays unlocked\", set or ROTATE the password, add/remove bypass tokens for CI or automation (Lighthouse, uptime), make one preview domain public, protect previews on an app with NO existing middleware, gate a production or pre-launch site with a shared password (coming-soon, client demo, internal tool), remove/uninstall/revert this password gate or make a gated site public again, or choose between a DIY gate and Vercel Authentication (free team SSO)."
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.11.11"
+  version: "1.12.0"
 ---
 
 # Vercel deployment password gate
@@ -18,6 +18,13 @@ one-boolean short-circuit (Mode A), so the gate's production cost is zero. Only
 a **scrypt hash** of the password is stored; unlock cookies are keyed
 per-credential, so rotating the password or removing a bypass token revokes
 exactly the cookies it issued.
+
+## Removing an existing installation?
+
+For "remove the password protection", "uninstall the gate", or "make the site
+public again", go directly to [Remove the gate](./reference/uninstall.md).
+Do not run the installation steps. That guide covers reverting isolated commits,
+manual removal, external configuration cleanup, and deployment verification.
 
 ## What this reimplements
 
@@ -172,6 +179,38 @@ because absent config is intentionally fail-open (an existing install that still
 has `PREVIEW_PASSWORD_HASH` keeps working; migrate at leisure). The current name
 **wins** if both are set. To migrate, add the `DEPLOY_GATE_*` var and remove the
 `PREVIEW_*` one; the alias support is a courtesy, not a permanent contract.
+
+## Before installing — make the change reversible (required)
+
+1. Inspect `git status --short` and the existing middleware/build configuration.
+   Preserve unrelated work. Use a feature branch or isolated worktree; do not
+   stage other changes into the gate installation.
+2. **Implement and commit the gate as a standalone change.** Include its helper,
+   integration, branded form, gate-only tests, build wiring, and any dependency
+   and lockfile changes in a gate-only commit, e.g.
+   `feat(deploy-gate): install deployment password protection`. Stage explicit
+   paths or hunks and inspect `git diff --cached` before committing.
+3. Keep independently useful prerequisites (such as a middleware-to-proxy
+   migration) in separate commits. Keep subsequent gate fixes/customizations
+   gate-only too. Do not mix application features into these commits.
+   If the repository requires squash merges, use a **gate-only PR** so the
+   resulting squash commit is also safe to revert.
+4. Copy [the installation record](./templates/deploy-gate-installation.md) into
+   the app, normally `docs/deploy-gate-installation.md`, and fill in actual paths,
+   mode, build changes, dependency changes, variable **names and scopes**, and
+   external configuration changes. Never record passwords, hashes, tokens, or
+   bypass URLs. Include this initial record in the installation commit.
+5. After committing, record the full installation SHA(s) in a separate docs
+   commit (a commit cannot contain its own SHA). After a squash/rebase, update
+   the record with the actual commits on the target branch; the PR URL helps
+   locate them. Record prerequisites separately as **keep by default**. Include
+   the uninstall guide link and these SHAs in the handoff. If commits are
+   explicitly disallowed, keep the record and report that manual removal is
+   required until an isolated installation commit exists.
+
+A Git revert only undoes repository changes. Vercel variables, CI secrets,
+platform settings, and existing deployments need separate cleanup; see
+[Remove the gate](./reference/uninstall.md). Do not promise one-command uninstall.
 
 ## Mode A — app already has `middleware.ts` / `proxy.ts`
 

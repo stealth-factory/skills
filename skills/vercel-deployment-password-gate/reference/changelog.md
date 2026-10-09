@@ -2,6 +2,13 @@
 
 Detailed version history and how non-obvious claims were verified. The current behavior lives in [SKILL.md](../SKILL.md); this file is the audit trail.
 
+v1.12.0 (2026-10-10): require isolated gate installation commits/PRs and a
+non-secret installation record, including post-squash commit tracking. Add an
+explicit uninstall route with newest-first reverts, manual removal for both
+integration modes, current/legacy environment cleanup, and verification of new
+deployments while accounting for unchanged historical deployments. Templates'
+runtime behavior is unchanged.
+
 Provenance: Next 16 proxy rename + Node-only runtime verified against the
 official v16 upgrade guide (2026-07); build-time `VERCEL_ENV`/`VERCEL`
 availability and Deployment Protection tiers/bypass methods per Vercel docs,
