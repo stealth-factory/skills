@@ -2,6 +2,21 @@
 
 Detailed version history and how non-obvious claims were verified. The current behavior lives in [SKILL.md](../SKILL.md); this file is the audit trail.
 
+v1.12.0 (2026-10-10): require isolated gate installation commits/PRs and a
+non-secret installation record, including post-squash commit tracking. Add an
+explicit uninstall route with newest-first reverts, manual removal for both
+integration modes (Next 16 `proxy.ts`, Next ≤15 `middleware.ts` /
+`src/middleware.ts`, `pageExtensions` names, and root-only non-Next
+`middleware.ts`), current/legacy environment cleanup, and verification of new
+deployments while accounting for unchanged historical deployments. The SHA
+bookkeeping commit stays out of the gate-only revert sequence. The installation
+record is marked removed afterward and kept as the audit trail. Leftover search
+and post-removal checks include legacy
+`/__preview-unlock` and hyphenated `preview-gate` identifiers. Deleting a shared
+credential is gated on remaining deployable branches, because absent config
+fails open. Bypass-header callers stop before an alias moves to a build that
+no longer strips the header. Templates' runtime behavior is unchanged.
+
 Provenance: Next 16 proxy rename + Node-only runtime verified against the
 official v16 upgrade guide (2026-07); build-time `VERCEL_ENV`/`VERCEL`
 availability and Deployment Protection tiers/bypass methods per Vercel docs,
