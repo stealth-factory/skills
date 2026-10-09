@@ -4,7 +4,7 @@ description: How to author and publish agent skills for the skills.sh / `npx ski
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.2.1"
+  version: "1.2.2"
 ---
 
 # skill-publishing
@@ -211,6 +211,14 @@ Other flags: `-g/--global`, `-l/--list`, `-y/--yes` (skip prompts),
 when a root `SKILL.md` exists — needed for a repo that has both a root skill and a
 `skills/` dir). Telemetry is on by default; set `DISABLE_TELEMETRY=1` (or
 `DO_NOT_TRACK=1`) to opt out.
+
+**Check copy layouts after updates.** In v1.5.23, `skills update` can replace
+project skills installed with `--copy` with symlinks into
+`.agents/skills/`. This was reproduced on Linux for a Git-source Claude Code
+install with Claude Code detected; [an upstream report](https://github.com/vercel-labs/skills/issues/1199#issuecomment-5365810628)
+also describes it on macOS. Inspect destination types after updates, especially
+before committing copied skills. Re-running `skills add` with `--copy` and the
+required agents restored real directories in the Linux fixture.
 
 > Provenance: flag forms, project/global `--all`, lock metadata, and the restore
 > cases above were checked against the npm package `skills` **v1.5.23** on
