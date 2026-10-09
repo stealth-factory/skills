@@ -8,9 +8,10 @@ explicit uninstall route with newest-first reverts, manual removal for both
 integration modes (Next 16 `proxy.ts`, Next ≤15 `middleware.ts` /
 `src/middleware.ts`, `pageExtensions` names, and root-only non-Next
 `middleware.ts`), current/legacy environment cleanup, and verification of new
-deployments while accounting for unchanged historical deployments. The record
-SHA bookkeeping commit stays out of the gate-only revert sequence and is marked
-removed afterward. Leftover search and post-removal checks include legacy
+deployments while accounting for unchanged historical deployments. The SHA
+bookkeeping commit stays out of the gate-only revert sequence. The installation
+record is marked removed afterward and kept as the audit trail. Leftover search
+and post-removal checks include legacy
 `/__preview-unlock` and hyphenated `preview-gate` identifiers. Deleting a shared
 credential is gated on remaining deployable branches, because absent config
 fails open. Bypass-header callers stop at cutover, when header stripping goes
