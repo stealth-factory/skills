@@ -4,7 +4,7 @@ description: Add a GitHub Actions workflow that posts code-size and cost statist
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # Code complexity / cost stats on every PR

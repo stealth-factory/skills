@@ -37,12 +37,12 @@ jobs:
     if: github.event_name == 'schedule' || github.ref_name == github.event.repository.default_branch
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # REQUIRED: semantic-release needs full history + tags
           persist-credentials: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: lts/* # current LTS; satisfies semantic-release's Node >= 22.14.0
           cache: npm

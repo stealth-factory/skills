@@ -4,7 +4,7 @@ description: "Cut fewer, batched releases (a 'release train') instead of one per
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.2.1"
+  version: "1.2.2"
 ---
 
 # Pooled releases (release trains)

@@ -4,7 +4,7 @@ description: "Automate versioning, changelog, tags, GitHub Releases, and npm pub
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.3.1"
+  version: "1.3.2"
 ---
 
 # semantic-release automation
@@ -105,9 +105,9 @@ The workflow detects **which packages changed** with `dorny/paths-filter` and ru
       outputs:
         changed: ${{ steps.f.outputs.changes }}
       steps:
-        - uses: actions/checkout@v7
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         - id: f
-          uses: dorny/paths-filter@v4
+          uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
           with:
             filters: | # name each key after the package's directory
               apps/web: ['apps/web/**']
@@ -122,9 +122,9 @@ The workflow detects **which packages changed** with `dorny/paths-filter` and ru
           pkg: ${{ fromJson(needs.detect.outputs.changed) }}
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v7
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
           with: { fetch-depth: 0 } # add persist-credentials: false to use GH_TOKEN below (private repos then need it wired into the git pull, e.g. a URL with the token)
-        - uses: actions/setup-node@v6
+        - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
           with: { node-version: lts/*, cache: npm }
         - run: npm ci
         - working-directory: ${{ matrix.pkg }} # filter key == package dir
