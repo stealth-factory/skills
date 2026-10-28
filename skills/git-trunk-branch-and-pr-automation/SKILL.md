@@ -4,7 +4,7 @@ description: "Trunk-based Git workflow with enforced branch naming and squash-me
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.3.0"
+  version: "1.3.1"
 ---
 
 # Trunk-based branches + squash-PR automation

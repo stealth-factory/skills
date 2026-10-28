@@ -4,7 +4,7 @@ description: "Stop every push/merge to main from shipping to production — depl
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.4.0"
+  version: "1.4.1"
 ---
 
 # Gating production deploys to real releases
