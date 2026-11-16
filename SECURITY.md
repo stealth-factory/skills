@@ -22,6 +22,11 @@ Only the latest commit on `main` is supported. Skills are installed from the
 repository, not from releases, so a fix reaches users when they run
 `npx skills update`.
 
+That refreshes the installed skill only. Some skills tell the agent to **copy**
+template code into your project (for example `templates/deploy-gate*.ts`), and
+those copies are not updated. When an advisory names a template, review your
+copy and apply the fix there too.
+
 ## Reporting a vulnerability
 
 Please **do not open a public issue or pull request** for a security problem.
