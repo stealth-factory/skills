@@ -72,6 +72,7 @@ skills/
     templates/*      # optional — boilerplate the skill copies
 README.md
 AGENTS.md            # conventions for authoring skills in this repo
+SECURITY.md          # how to report a vulnerability privately
 ```
 
 The `skills` CLI auto-discovers `skills/<name>/SKILL.md` (flat) and

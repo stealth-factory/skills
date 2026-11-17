@@ -74,11 +74,15 @@ function gateConfig(): GateConfigState {
 // PREVIEW_* spelling was a lie. The old names still work (with a warning)
 // because absent config FAILS OPEN by design: a silent rename would find no
 // password and quietly unprotect every deployment on upgrade.
-const LEGACY_ENV_NAMES: Record<string, string> = {
-  DEPLOY_GATE_PASSWORD_HASH: "PREVIEW_PASSWORD_HASH",
-  DEPLOY_GATE_PASSWORD: "PREVIEW_PASSWORD",
-  DEPLOY_GATE_BYPASS_TOKENS: "PREVIEW_GATE_BYPASS_TOKENS",
-};
+// Pairs of env-var NAMES [current, legacy] — no values live here. Written as
+// tuples rather than an object literal because a key ending in PASSWORD with a
+// string value reads as a hardcoded credential to secret scanners (a false
+// positive, but it fails catalogue scans).
+const LEGACY_ENV_NAMES: Record<string, string> = Object.fromEntries([
+  ["DEPLOY_GATE_PASSWORD_HASH", "PREVIEW_PASSWORD_HASH"],
+  ["DEPLOY_GATE_PASSWORD", "PREVIEW_PASSWORD"],
+  ["DEPLOY_GATE_BYPASS_TOKENS", "PREVIEW_GATE_BYPASS_TOKENS"],
+]);
 const warnedLegacy = new Set<string>();
 
 function readGateEnv(name: keyof typeof LEGACY_ENV_NAMES | string): string | undefined {

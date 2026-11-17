@@ -4,7 +4,7 @@ description: "A free DIY reimplementation of Vercel's $150/mo Advanced Deploymen
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.12.0"
+  version: "1.12.1"
 ---
 
 # Vercel deployment password gate
