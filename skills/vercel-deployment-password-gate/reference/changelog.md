@@ -23,8 +23,8 @@ availability and Deployment Protection tiers/bypass methods per Vercel docs,
 same date. Removal-script guard behavior and both helper scripts smoke-tested
 locally (2026-07-17). Password hashing upgraded from salted SHA-256 to scrypt
 after CodeQL flagged `js/insufficient-password-hash` (high) in a real install
-(piaf-web PR #122, 2026-07-17). Round-2 review of the same install (Codex +
-Greptile) added: /api-inclusive matcher guidance, the block/setCookie contract
+(piaf-web PR #122, 2026-07-17). Round-2 review of the same install (Codex and
+another review bot) added: /api-inclusive matcher guidance, the block/setCookie contract
 (header bypass must not skip the host pipeline), and fail-closed on malformed
 config. v1.6.0 hardening pass (2026-07-17): bypass is now tokens-only
 (password-as-bypass ran scrypt per request — a CPU-DoS amplifier),
@@ -49,7 +49,7 @@ v1.8.0 (2026-07-17, piaf-web PR #124 review): the gate keys off
 development), so the v1.6/1.7 `VERCEL_ENV` test left custom targets that report
 `VERCEL_ENV=production` ungated; the build-strip likewise now keys off
 `VERCEL_TARGET_ENV` so it strips only TRUE production. Also backported from the
-same review: legacy `DEPLOY_GATE_PASSWORD` over the length cap fails closed (Greptile
+same review: legacy `DEPLOY_GATE_PASSWORD` over the length cap fails closed (review-bot
 P1 — otherwise gated with no valid unlock), and the 503 message names both
 misconfiguration causes.
 v1.8.1 (2026-07-17): consistency pass after v1.8.0 — the "Gating production
@@ -170,7 +170,7 @@ fail-open holes and fixed the install-blockers a review pass surfaced.
   different token).
 - **F2:** the stdin password prompt echoed plaintext — muted via readline
   `_writeToOutput`; verified under a pty. **F3:** removal script candidate-scan
-  (above). **F1** (greptile "cookie request-only") rejected as safe: `next({headers})`
+  (above). **F1** (review bot "cookie request-only") rejected as safe: `next({headers})`
   sets response headers, verified against @vercel/functions source.
 - Neutralized preview-specific unlock-form copy (the gate protects production
   too). All fixes verified: 16 gate + 24 host + 7 config-fallback cases pass
@@ -224,7 +224,7 @@ v1.11.4 (2026-07-17, PR #24 round-3 Codex findings on the latest commits):
   copy is silently ignored → ungated preview. Corrected to root-only; the `src/`
   guidance is Next `proxy.ts`-only. Verified against Vercel Routing Middleware
   API docs (2026-07-01).
-Re-confirmed the Greptile re-posts on the latest commit are already-handled: F1
+Re-confirmed the review-bot re-posts on the latest commit are already-handled: F1
 (bypass cookie) rejected-safe, F2 (prompt echo) fixed, F3 (strip target) fixed.
 
 v1.11.5 (2026-07-17, PR #24 round-4 — CodeRabbit / Codex / Copilot on the latest push):
@@ -248,7 +248,7 @@ v1.11.5 (2026-07-17, PR #24 round-4 — CodeRabbit / Codex / Copilot on the late
   README qualifies the Hobby "only option" claim as an inference (CodeRabbit); codemod
   tag `@latest` → `@canary` to match Next's docs; fixed a double em-dash in the
   deploy-gate.ts docblock (Copilot).
-- **Rejected:** Greptile "bypass cookie stays request-only" — re-confirmed safe
+- **Rejected:** review-bot "bypass cookie stays request-only" — re-confirmed safe
   (`next({ headers })` sets response headers, verified against @vercel/functions).
 Verified: 16 e2e + 7 blank-secret + 6 NODE_ENV gate cases pass; matcher and cookie
 behavior smoke-tested; both templates typecheck clean.
