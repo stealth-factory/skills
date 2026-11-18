@@ -17,7 +17,7 @@
 
 - **Observability — a third axis, and the one that breaks waiting.** Cadence tells you
   *when* a bot re-reviews; observability tells you whether you can **see** it happen:
-  - **Check-backed** (CodeRabbit, sometimes Greptile) — a status check exists, so
+  - **Check-backed** (CodeRabbit) — a status check exists, so
     pending vs finished is visible. You can wait on it. **But read the description**:
     CodeRabbit's green can say `"Review rate limited"`, meaning it never looked.
   - **Comment-only** (Codex) — **no status check at all**, so nothing in the check
@@ -129,7 +129,6 @@ just adds noise.
 | **Cursor Bugbot** (`cursor[bot]`) | `cursor review` **or** `bugbot run` (bare keywords, no `@`) · `cursor review verbose=true` | **No comment command.** Dashboard only: **"Run only when mentioned"** (silences auto-review until you comment a trigger) or **"Run only once per PR"**. | `@cursor remember [fact]` teaches a persistent learned rule. No comment resolve/dismiss. |
 | **Codex** (`@codex`) | **`@codex review`** (flags P0/P1 only) · `@codex review for <focus>` | **No comment command.** Settings only: turn off **Code review** / **Automatic reviews** for the repo. | **`@codex` + anything other than `review`** = a cloud task that *makes changes* (e.g. `@codex fix the P1 issue`), **not** a review. |
 | **GitHub Copilot** — review = `copilot-pull-request-reviewer[bot]` | **No comment command.** Add **Copilot** via the **Reviewers** menu ("Request"); re-request with the ↻ button — **on the final HEAD, not per fix round (each re-request is a metered Copilot review; a final-pass fix makes a new final HEAD that gets its own request)** — or auto-review via a branch **ruleset**. | **No comment command.** Disable "Automatic Copilot code review" (settings) or remove the ruleset. | **`@copilot` is the *coding agent*, not review** — it *implements changes* at a write-access user's request; it does **not** trigger a code review. |
-| **Greptile** (`@greptileai`) | `@greptileai` (mention alone; also `@greptileai <question/focus>`) | **No comment command.** Reviews only the initial PR-open by default (`triggerOnUpdates` defaults to **`false`**), so it's already quiet on pushes — set `triggerOnUpdates: false` only to undo a repo that opted into `true`. Skip even the initial review with `skipReview: "AUTOMATIC"` (manual-only); also `disabledLabels` / `excludeBranches` / `ignoreKeywords`. | Too chatty → config `strictness` / `commentTypes` / `updateSummaryOnly`, or 👎-react to train it down (`.greptile/config.json` or dashboard). |
 
 **Using this in the loop:**
 
@@ -137,7 +136,7 @@ just adds noise.
   reach a HEAD you believe is final/converged, not on every fix round** (each request
   is a metered review; a final-pass fix makes a new final HEAD that gets its own
   request) — e.g.
-  `@codex review`, `@greptileai` (its per-push re-review is off by default), or
+  `@codex review` or
   Copilot's Reviewers-menu re-request. **Not** an auto-per-push reviewer like `@coderabbitai`,
   which re-reviews every push itself — a manual `@coderabbitai review` just spends
   another review allowance on the same SHA.
@@ -148,7 +147,7 @@ just adds noise.
   batching ("Minimise review triggers" in [`triage-playbook.md`](./triage-playbook.md))
   to cut duplicate reviews.
 
-**Provenance (official docs, verified 2026-07; no per-page freshness dates shown — re-verify if a command no-ops):** CodeRabbit — `docs.coderabbit.ai/guides/commands` + `/reference/review-commands`; Cursor Bugbot — `cursor.com/docs/bugbot` + `cursor.com/help/ai-features/bugbot`; Codex — `learn.chatgpt.com/docs/third-party/github`; GitHub Copilot — `docs.github.com/en/copilot` (code-review + coding-agent pages); Greptile — `greptile.com/docs/code-review-bot/trigger-code-review` + `/code-review/greptile-json-reference`.
+**Provenance (official docs, verified 2026-07; no per-page freshness dates shown — re-verify if a command no-ops):** CodeRabbit — `docs.coderabbit.ai/guides/commands` + `/reference/review-commands`; Cursor Bugbot — `cursor.com/docs/bugbot` + `cursor.com/help/ai-features/bugbot`; Codex — `learn.chatgpt.com/docs/third-party/github`; GitHub Copilot — `docs.github.com/en/copilot` (code-review + coding-agent pages).
 
 ## Adding a new bot
 

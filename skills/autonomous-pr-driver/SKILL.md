@@ -4,7 +4,7 @@ description: "Autonomously drive a pull request to merge-ready — opening or at
 metadata:
   author: stealth-factory
   co-author: wiiiimm
-  version: "1.8.0"
+  version: "1.8.1"
 ---
 
 # Autonomous PR driver
